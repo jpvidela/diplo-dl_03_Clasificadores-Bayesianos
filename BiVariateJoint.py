@@ -21,25 +21,25 @@ def get_class_prob(x1_data, x2_data, joint_class_1, joint_class_2):
     ''' Devuelve la probabilidad de que los pares de datos x1_data y 
         x2_data pertenezcan a la clase 1 o 2, dado un conjunto de pares de variables para cada clase (joint_class).
     '''
-        # Cantidad de la clase dividido el total de valores. Es decir, son las marginales
-        prior_class_1 = joint_class_1.N/ (joint_class_1.N + joint_class_2.N)
-        prior_class_2 = joint_class_2.N/ (joint_class_1.N + joint_class_2.N)
-        
-        # Probabilidad de ocurrencia del par de valores, calculado como la cantidad de observaciones sobre el total para esa clase
-        likelihood_class_1 = joint_class_1.get_prob(x1_data, x2_data)
-        likelihood_class_2 = joint_class_2.get_prob(x1_data, x2_data)
-        
-        # Termino normalizador: Probabilidad total de ocurrencia del par de valores
-        total = likelihood_class_1*prior_class_1 + prior_class_2*likelihood_class_2
-        
-        # Evita division por cero
-        total[total==0] = 1
-        p_class_1 = prior_class_1*likelihood_class_1/total
-        p_class_2 = prior_class_2*likelihood_class_2/total
-        # Las indeterminadas en 0.5
-        p_class_1[total==1] = 0.5
-        p_class_2[total==1] = 0.5
-        return p_class_1, p_class_2
+    # Cantidad de la clase dividido el total de valores. Es decir, son las marginales
+    prior_class_1 = joint_class_1.N/ (joint_class_1.N + joint_class_2.N)
+    prior_class_2 = joint_class_2.N/ (joint_class_1.N + joint_class_2.N)
+
+    # Probabilidad de ocurrencia del par de valores, calculado como la cantidad de observaciones sobre el total para esa clase
+    likelihood_class_1 = joint_class_1.get_prob(x1_data, x2_data)
+    likelihood_class_2 = joint_class_2.get_prob(x1_data, x2_data)
+
+    # Termino normalizador: Probabilidad total de ocurrencia del par de valores
+    total = likelihood_class_1*prior_class_1 + prior_class_2*likelihood_class_2
+
+    # Evita division por cero
+    total[total==0] = 1
+    p_class_1 = prior_class_1*likelihood_class_1/total
+    p_class_2 = prior_class_2*likelihood_class_2/total
+    # Las indeterminadas en 0.5
+    p_class_1[total==1] = 0.5
+    p_class_2[total==1] = 0.5
+    return p_class_1, p_class_2
 
 class BiVariateJoint:
     '''Serie de métodos y propiedades para un conjunto de dos variables. Ej: (Pesos,Alturas).'''
