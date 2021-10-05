@@ -3,13 +3,19 @@ from collections import Counter
 from matplotlib import pyplot as plt
 
 def get_class_prob_naive(x_data, y_data, joint_class_1, joint_class_2, likelihood_indep_class_1, likelihood_indep_class_2):
+    # Probabilidad total de tener hombres/mujeres: Cantidad de observaciones de hombres o mujeres /cantidad total de observaciones (hombres + mujeres)
     prior_class_1 = joint_class_1.N/ (joint_class_1.N + joint_class_2.N)
     prior_class_2 = joint_class_2.N/ (joint_class_1.N + joint_class_2.N)
+    
     likelihood_class_1 = likelihood_indep_class_1[joint_class_1.data_to_index(x_data, y_data)] 
     likelihood_class_2 = likelihood_indep_class_2[joint_class_2.data_to_index(x_data, y_data)]
+        
+    # El dividendo, suma la probabilidad conjunta de ambas clases, que es lo mismo que sumar la P(clase) + P(¬clase) (Clasificación Binaria)
     total = likelihood_class_1*prior_class_1 + prior_class_2*likelihood_class_2
-    # Evita division por cero
+    # Evita division por cero (cuando no hay obeservaciones, el likelihood es 0)
     total[total==0] = 1
+
+    # Posterioris
     p_class_1 = prior_class_1*likelihood_class_1/total
     p_class_2 = prior_class_2*likelihood_class_2/total
     # Las indeterminadas en 0.5
@@ -73,6 +79,7 @@ class BiVariateJoint:
         # Agrego uno adelante y otro atras para cubrirme
         count_X = int(np.round((self.maxs[0] - self.mins[0])/step_X)) + 1
         count_Y = int(np.round((self.maxs[1] - self.mins[1])/step_Y)) + 1
+        
         # Serie completa de valores, desde MIN a MAX según intervalo = step
         self.X = np.linspace(self.mins[0] - step_X, self.mins[0] + step_X*count_X, count_X + 2)
         self.Y = np.linspace(self.mins[1] - step_Y, self.mins[1] + step_Y*count_Y, count_Y + 2)
@@ -111,17 +118,19 @@ class BiVariateJoint:
         '''
         # Inicializa matriz de 0, de dimensiones X*Y
         joint = np.zeros([len(self.X), len(self.Y)])
-        # Itera en pares de valores y su frecuencia
-        for index, frec in self.frequencies.items():
-            # Cantidad de intervalos de distancia desde valor mínimo de X o Y
+        
+        # Itera en pares de valores y su frecuencia (Counter)
+        for index, frec in self.frequencies.items():   
+            # Cantidad de intervalos de distancia desde valor mínimo de X o Y. Index[0] es el valor de 'x', index[1] de 'y' y frec la cantidad de observaciones.
             x = (index[0] - self.X[0])/self.step_X
             y = (index[1] - self.Y[0])/self.step_Y
-            # Trunco al entero para obtener la posición de en la matriz de frecuencias.
+            # Trunco a un entero para obtener la posición de en la matriz de frecuencias.
             joint[int(x), int(y)] = frec
         return joint
     
     def get_Marginals(self, normalized=True):
         if normalized:
+            # La probabilidad marginal es el recuento de observaciones para cada combinación variables (ej: peso y altura), dado un intervalo (step)
             marg_1 = self.joint_matrix.sum(axis=1)/self.N
             marg_2 = self.joint_matrix.sum(axis=0)/self.N
         else:
